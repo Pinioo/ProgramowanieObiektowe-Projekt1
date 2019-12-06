@@ -1,6 +1,7 @@
 package agh.evolutiongame;
 
 import java.util.Random;
+import java.util.Vector;
 
 public class Vector2d {
     final public int x;
@@ -55,23 +56,11 @@ public class Vector2d {
         return new Vector2d(-this.x, -this.y);
     }
 
-    static public Vector2d randInSquare(int from, int to){
-        int x = from + rand.nextInt(to - from);
-        int y = from + rand.nextInt(to - from);
-        return new Vector2d(x, y);
-    }
-
-    static public Vector2d randInRect(Vector2d lowerLeft, Vector2d upperRight){
-        int x = lowerLeft.getX() + rand.nextInt(upperRight.getX() - lowerLeft.getX());
-        int y = lowerLeft.getY() + rand.nextInt(upperRight.getY() - lowerLeft.getY());
-        return new Vector2d(x, y);
-    }
-
     @Override
     public boolean equals(Object other){
         if(this == other) return true;
         return other instanceof Vector2d && this.x == ((Vector2d) other).x && this.y == ((Vector2d) other).y;
-}
+    }
 
     @Override
     public String toString(){

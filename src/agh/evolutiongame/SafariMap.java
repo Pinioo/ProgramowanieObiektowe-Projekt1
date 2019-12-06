@@ -1,103 +1,157 @@
 package agh.evolutiongame;
 
+import javax.naming.SizeLimitExceededException;
+import javax.swing.*;
+import java.util.LinkedList;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SafariMap extends AbstractWorldMap {
-    private Vector2d lowerLeft = new Vector2d(0,0);
-    private Vector2d upperRight = new Vector2d(99,29);
-
-    private Vector2d jungleLowerLeft = new Vector2d(45, 10);
-    private Vector2d jungleUpperRight = new Vector2d(54, 19);
-    private MapBoundary boundary = new MapBoundary();
-
+    private JungleMap jungle;
     private int startingGrassEnergy = 10;
 
-    private Random rand = new Random();
+    public SafariMap(int width, int height, double jungleRatio, int randomAnimals){
+        super(new Vector2d(0,0), new Vector2d(width, height));
+        this.jungle = new JungleMap(this.area.scale(jungleRatio));
+        this.maxElements -= this.jungle.maxElements;
+        System.out.println(this.jungle.area.lowerLeft);
+        System.out.println(this.jungle.area.upperRight);
+        System.out.println(this.jungle.maxElements);
+        System.out.println(this.maxElements);
+        for (int i = 0; i < randomAnimals; i++) {
+            this.placeRandomAnimal();
+        }
+    }
+
+    public void placeRandomAnimal(){
+        Vector2d randPosition;
+        do {
+            randPosition = this.area.randPoint();
+        }while(this.isOccupied(randPosition));
+        new Animal(this, randPosition, 1000);
+    }
+
+    private Stream<IMapElement> allElementsStream(){
+        Stream<IMapElement> stream1 = this.elementsHashMap.allElementsList().stream();
+        Stream<IMapElement> stream2 = this.jungle.elementsHashMap.allElementsList().stream();
+
+        return Stream.concat(stream1, stream2);
+    }
+
+    private Stream<Animal> allAnimalsStream(){
+        return this.allElementsStream().filter(p -> p instanceof Animal).map(Animal.class::cast);
+    }
 
     public void newDay(){
-        for(Animal an : this.animalsList){
-            an.decreaseEnergy();
-            an.randomRotate();
-            an.moveForward();
+        this.randGrass(startingGrassEnergy);
+        this.jungle.randGrass(startingGrassEnergy);
+        this.allAnimalsStream().forEach(
+                an -> {
+                    if(!an.decreaseEnergy()) {
+                        an.randomRotate();
+                        an.moveForward();
+                    }
+                }
+        );
+    }
+
+    public LinkedList<Animal> animalsOnPosition(Vector2d position){
+        LinkedList<IMapElement> list = this.objectsAt(position);
+        if (list == null)
+            return new LinkedList<>();
+        return list.stream().filter((p) -> p instanceof Animal).map(Animal.class::cast).collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    public LinkedList<Animal> strongestAnimalsAtPosition(Vector2d position) {
+        LinkedList<Animal> animalsOnPosition = this.animalsOnPosition(position);
+        if (!animalsOnPosition.isEmpty()) {
+            final int maxEnergy = animalsOnPosition.stream().max(Animal::compareByEnergy).get().getEnergy();
+            return animalsOnPosition.stream().filter((p) -> p.getEnergy() == maxEnergy).collect(Collectors.toCollection(LinkedList::new));
         }
+        else
+            return animalsOnPosition;
     }
 
     public Vector2d correctPosition(Vector2d requestedPosition){
         return new Vector2d(
-                Math.floorMod(requestedPosition.getX(), this.upperRight.getX()),
-                Math.floorMod(requestedPosition.getY(), this.upperRight.getY())
+                Math.floorMod(requestedPosition.getX(), this.area.upperRight.getX() + 1),
+                Math.floorMod(requestedPosition.getY(), this.area.upperRight.getY() + 1)
         );
     }
 
-    private void randGrassInSafari(){
-        Vector2d newPosition = Vector2d.randInRect(jungleLowerLeft, jungleUpperRight);
-
-        //If newPosition is occupied this loop finds next available spot
-        while(this.isOccupied(newPosition)){
-            newPosition = nextPositionInSafari(newPosition);
+    @Override
+    protected void randGrass(int caloricValue){
+        if(this.elementsHashMap.getMap().size() < this.maxElements){
+            Vector2d randPosition;
+            do{
+                randPosition = this.area.randPoint();
+            }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
+            new Grass(this, randPosition, caloricValue);
         }
-
-        Grass gr = new Grass(newPosition, this.startingGrassEnergy);
-        gr.addObserver(this);
-        gr.addObserver(this.boundary);
-        this.objectAdded(newPosition, gr);
-        this.boundary.objectAdded(newPosition, gr);
     }
 
-    private void randGrassInJungle(){
-        Vector2d newPosition = Vector2d.randInRect(jungleLowerLeft, jungleUpperRight);
 
-        //If newPosition is occupied this loop finds next available spot
-        while(this.isOccupied(newPosition)){
-            newPosition = this.nextPositionInJungle(newPosition);
-        }
-
-        Grass gr = new Grass(newPosition, this.startingGrassEnergy);
-        gr.addObserver(this);
-        gr.addObserver(this.boundary);
-        this.objectAdded(newPosition, gr);
-        this.boundary.objectAdded(newPosition, gr);
-    }
-
-    private Vector2d nextPositionOnMap(Vector2d position){
-        Vector2d nextPosition = new Vector2d(position.getX() + 1, position.getY());
-        if(!nextPosition.precedes(this.upperRight))
-            nextPosition = new Vector2d(0, position.getY() + 1);
-        if(!nextPosition.follows(this.lowerLeft))
-            nextPosition = new Vector2d(0,0);
-        return nextPosition;
-    }
-
-    private Vector2d nextPositionInSafari(Vector2d position){
-        Vector2d nextPosition = position;
-        do{
-            nextPosition = this.nextPositionOnMap(nextPosition);
-        }while(nextPosition.follows(jungleLowerLeft) && nextPosition.precedes(jungleUpperRight));
-
-        return nextPosition;
-    }
-
-    private Vector2d nextPositionInJungle(Vector2d position){
-        Vector2d nextPosition = position;
-        do{
-            nextPosition = this.nextPositionOnMap(nextPosition);
-        }while(!(nextPosition.follows(jungleLowerLeft) && nextPosition.precedes(jungleUpperRight)));
-
-        return nextPosition;
+    @Override
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition, IMapElement element){
+        this.objectRemoved(oldPosition, element);
+        this.objectAdded(newPosition, element);
     }
 
     @Override
-    public boolean canMoveTo(Vector2d position) {
-        return !(this.objectAt(position) instanceof Animal);
+    public void objectRemoved(Vector2d position, IMapElement element) {
+        if(this.jungle.isPositionInside(position))
+            this.jungle.objectRemoved(position, element);
+        else
+            super.objectRemoved(position, element);
+    }
+
+    @Override
+    public void objectAdded(Vector2d position, IMapElement element) {
+        if(this.jungle.isPositionInside(position))
+            this.jungle.objectAdded(position, element);
+        else
+            super.objectAdded(position, element);
+    }
+
+    @Override
+    public LinkedList<IMapElement> objectsAt(Vector2d position) {
+        if(this.jungle.isPositionInside(position))
+            return this.jungle.objectsAt(position);
+        else
+            return super.objectsAt(position);
     }
 
     @Override
     public Vector2d getLowerLeft() {
-        return this.boundary.lowerLeft();
+        return this.area.lowerLeft;
     }
 
     @Override
     public Vector2d getUpperRight() {
-        return this.boundary.upperRight();
+        return this.area.upperRight;
+    }
+
+    @Override
+    public String symbolOnPosition(Vector2d position){
+        LinkedList<Animal> animalsOnPosition = this.animalsOnPosition(position);
+        int animalsCount = animalsOnPosition.size();
+        switch(animalsCount){
+            case 0: {
+                if (this.objectsAt(position) != null)
+                    return "*";
+                else
+                    return " ";
+            }
+            case 1:
+                return "A";
+            default: {
+                if(animalsCount < 10)
+                    return String.valueOf(animalsCount);
+                else
+                    return "S";
+            }
+        }
     }
 }

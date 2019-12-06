@@ -13,7 +13,7 @@ public abstract class AbstractObservedMapElement implements IMapElement {
 
     protected void positionChanged(Vector2d oldPosition, Vector2d newPosition){
         for(IPositionChangedObserver observer : this.observersList){
-            observer.positionChanged(oldPosition, newPosition);
+            observer.positionChanged(oldPosition, newPosition, this);
         }
     }
 

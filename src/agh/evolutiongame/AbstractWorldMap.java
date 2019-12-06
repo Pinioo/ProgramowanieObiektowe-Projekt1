@@ -4,20 +4,45 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public abstract class AbstractWorldMap implements IWorldMap{
-    protected LinkedList<Animal> animalsList = new LinkedList<>();
+    protected ListsHashMap<Vector2d, IMapElement> elementsHashMap = new ListsHashMap<>();
 
-    HashMap<Vector2d, IMapElement> elementsHashMap = new HashMap<>();
+    protected final Rectangle area;
 
-    @Override
-    public void positionChanged(Vector2d oldPosition, Vector2d newPosition){
-        IMapElement element = (IMapElement)this.objectAt(oldPosition);
-        elementsHashMap.remove(oldPosition);
-        elementsHashMap.put(newPosition, element);
+    protected int maxElements;
+
+    protected AbstractWorldMap(Vector2d lowerLeft, Vector2d upperRight) {
+        this.area = new Rectangle(lowerLeft, upperRight);
+        maxElements = (this.area.upperRight.x - this.area.lowerLeft.x + 1)*(this.area.upperRight.y - this.area.lowerLeft.y + 1);
+    }
+
+    protected AbstractWorldMap(Rectangle area){
+        this.area = area;
+        maxElements = (this.area.upperRight.x - this.area.lowerLeft.x + 1)*(this.area.upperRight.y - this.area.lowerLeft.y + 1);
+    }
+
+    protected void randGrass(int caloricValue){
+        if(this.elementsHashMap.getMap().size() < maxElements){
+            Vector2d randPosition;
+            do{
+                randPosition = this.area.randPoint();
+            }while(this.isOccupied(randPosition));
+            new Grass(this, randPosition, caloricValue);
+        }
+    }
+
+    public boolean isPositionInside(Vector2d position){
+        return this.area.isPointInside(position);
     }
 
     @Override
-    public void objectRemoved(Vector2d position) {
-        elementsHashMap.remove(position);
+    public void positionChanged(Vector2d oldPosition, Vector2d newPosition, IMapElement element){
+        this.elementsHashMap.remove(oldPosition, element);
+        this.elementsHashMap.put(newPosition, element);
+    }
+
+    @Override
+    public void objectRemoved(Vector2d position, IMapElement element) {
+        this.elementsHashMap.remove(position, element);
     }
 
     @Override
@@ -26,22 +51,12 @@ public abstract class AbstractWorldMap implements IWorldMap{
     }
 
     @Override
-    public void place(Animal animal) throws IllegalArgumentException {
-        if(this.canMoveTo(animal.getPosition())) {
-            this.animalsList.add(animal);
-            this.elementsHashMap.put(animal.getPosition(), animal);
-        }
-        else
-            throw new IllegalArgumentException("Animal cannot be placed at position " + animal.getPosition().toString());
-    }
-
-    @Override
     public boolean isOccupied(Vector2d position) {
-        return objectAt(position) != null;
+        return this.objectsAt(position) != null;
     }
 
     @Override
-    public Object objectAt(Vector2d position) {
+    public LinkedList<IMapElement> objectsAt(Vector2d position) {
         return this.elementsHashMap.get(position);
     }
 
