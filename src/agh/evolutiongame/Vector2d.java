@@ -1,5 +1,7 @@
 package agh.evolutiongame;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
 
@@ -42,6 +44,14 @@ public class Vector2d {
 
     public Vector2d lowerLeft(Vector2d other){
         return new Vector2d(Math.min(this.x, other.x), Math.min(this.y, other.y));
+    }
+
+    public ArrayList<Vector2d> positionsAround(){
+        ArrayList<Vector2d> list = new ArrayList<>();
+        for(MapDirection direct : MapDirection.values()){
+            list.add(this.add(direct.toUnitVector()));
+        }
+        return list;
     }
 
     public Vector2d add(Vector2d other){

@@ -17,6 +17,11 @@ public abstract class AbstractObservedMapElement implements IMapElement {
         }
     }
 
+    protected void remove() {
+        for(IPositionChangedObserver obs : this.observersList)
+            obs.objectRemoved(this.getPosition(), this);
+    }
+
     public void addObserver(IPositionChangedObserver obs){
         this.observersList.add(obs);
     }

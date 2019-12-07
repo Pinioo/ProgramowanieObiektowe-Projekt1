@@ -8,7 +8,9 @@ public class Animal extends AbstractObservedMapElement {
     private MapDirection direction;
     private IWorldMap map;
     private Genome genome;
+
     private int energy;
+    private final int startingEnergy;
 
     public Animal(IWorldMap map, Vector2d initialPosition, int energy){
         super(initialPosition);
@@ -17,16 +19,17 @@ public class Animal extends AbstractObservedMapElement {
         this.direction = MapDirection.rand();
         map.objectAdded(this.position, this);
         this.energy = energy;
-        this.addObserver(map);
+        this.startingEnergy = energy;
     }
 
     public Animal(IWorldMap map, Vector2d initialPosition, Animal parent1, Animal parent2){
         super(initialPosition);
         this.map = map;
-        this.genome = new Genome(parent1, parent2);
+        this.genome = new Genome(parent1,parent2);
         this.direction = MapDirection.rand();
-        this.energy = parent1.birthMiracle() + parent2.birthMiracle();
         map.objectAdded(this.position, this);
+        this.energy = parent1.animalReproduced() + parent2.animalReproduced();
+        this.startingEnergy = this.energy;
     }
 
     public void randomRotate(){
@@ -40,33 +43,32 @@ public class Animal extends AbstractObservedMapElement {
     public void moveForward(){
         Vector2d oldPosition = this.position;
         this.position = this.map.correctPosition(this.position.add(this.direction.toUnitVector()));
-        for(IPositionChangedObserver obs : observersList){
-            obs.positionChanged(oldPosition, this.position, this);
-        }
+        this.observersList.forEach(
+            obs -> obs.positionChanged(oldPosition, this.position, this)
+        );
     }
 
-    public int birthMiracle(){
+    public boolean canReproduce(){
+        return 2*this.energy >= this.startingEnergy;
+    }
+
+    private int animalReproduced(){
         int energyLost = this.energy / 4;
         this.energy -= energyLost;
         return energyLost;
     }
 
-    public boolean decreaseEnergy() {
-        this.energy--;
+    public void increaseEnergy(int energyDelta) {
+        this.energy += energyDelta;
+    }
+
+    public boolean decreaseEnergy(int energyDelta) {
+        this.energy -= energyDelta;
         if(this.energy <= 0) {
-            this.removeAnimal();
+            this.remove();
             return true;
         }
         return false;
-    }
-
-    public void plantEaten(Grass plant){
-        this.energy += plant.getCaloricValue();
-    }
-
-    private void removeAnimal() {
-        for(IPositionChangedObserver obs : this.observersList)
-            obs.objectRemoved(this.getPosition(), this);
     }
 
     public Genome getGenome() {

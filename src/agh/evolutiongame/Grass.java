@@ -10,9 +10,8 @@ public class Grass extends AbstractObservedMapElement {
         map.objectAdded(initialPosition, this);
     }
 
-    public void changePosition(Vector2d newGrassPosition) {
-        this.positionChanged(this.position, newGrassPosition);
-        this.position = newGrassPosition;
+    public void grassEaten(){
+        this.remove();
     }
 
     @Override

@@ -2,35 +2,35 @@ package agh.evolutiongame;
 
 import javax.naming.SizeLimitExceededException;
 import javax.swing.*;
-import java.util.LinkedList;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SafariMap extends AbstractWorldMap {
     private JungleMap jungle;
-    private int startingGrassEnergy = 10;
+    private final int grassEnergy;
+    private final int moveEnergy;
 
-    public SafariMap(int width, int height, double jungleRatio, int randomAnimals){
+    public SafariMap(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals){
         super(new Vector2d(0,0), new Vector2d(width, height));
         this.jungle = new JungleMap(this.area.scale(jungleRatio));
         this.maxElements -= this.jungle.maxElements;
-        System.out.println(this.jungle.area.lowerLeft);
-        System.out.println(this.jungle.area.upperRight);
-        System.out.println(this.jungle.maxElements);
-        System.out.println(this.maxElements);
+
+        this.grassEnergy = grassEnergy;
+        this.moveEnergy = moveEnergy;
+
         for (int i = 0; i < randomAnimals; i++) {
-            this.placeRandomAnimal();
+            this.placeRandomAnimal(startEnergy);
         }
     }
 
-    public void placeRandomAnimal(){
+    public void placeRandomAnimal(int startEnergy){
         Vector2d randPosition;
         do {
             randPosition = this.area.randPoint();
         }while(this.isOccupied(randPosition));
-        new Animal(this, randPosition, 1000);
+        (new Animal(this, randPosition, startEnergy)).addObserver(this);
     }
 
     private Stream<IMapElement> allElementsStream(){
@@ -44,14 +44,76 @@ public class SafariMap extends AbstractWorldMap {
         return this.allElementsStream().filter(p -> p instanceof Animal).map(Animal.class::cast);
     }
 
+    private Set<Vector2d> occupiedPositions(){
+        return this.elementsHashMap.getMap().keySet();
+    }
+
+    private ArrayList<Vector2d> allFreePositionsAround(Vector2d position){
+        return position.positionsAround().stream()
+                .filter(this::isPositionInside)
+                .filter(pos -> !this.isOccupied(pos))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private Grass grassOnPosition(Vector2d position){
+        for(IMapElement element: this.objectsAt(position)){
+            if(element instanceof Grass)
+                return (Grass)element;
+        }
+        return null;
+    }
+
+    private boolean tryToReproduce(Animal parent1, Animal parent2){
+        if(parent1.canReproduce() && parent2.canReproduce()){
+            ArrayList<Vector2d> possiblePositions = this.allFreePositionsAround(parent1.position);
+            if(!possiblePositions.isEmpty()){
+                int randIndex = (new Random()).nextInt(possiblePositions.size());
+                (new Animal(this, possiblePositions.get(randIndex), parent1, parent2))
+                        .addObserver(this);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void newDay(){
-        this.randGrass(startingGrassEnergy);
-        this.jungle.randGrass(startingGrassEnergy);
+        this.randGrass(this.grassEnergy);
+        this.jungle.randGrass(this.grassEnergy);
         this.allAnimalsStream().forEach(
                 an -> {
-                    if(!an.decreaseEnergy()) {
+                    if(!an.decreaseEnergy(this.moveEnergy)) {
                         an.randomRotate();
                         an.moveForward();
+                    }
+                }
+        );
+        LinkedList<Vector2d> occupiedPositions = new LinkedList<>(this.occupiedPositions());
+        occupiedPositions.forEach(
+                position -> {
+                    LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
+                    if(!animalsFromStrongest.isEmpty()){
+                        Grass grassOnPosition = this.grassOnPosition(position);
+                        if(grassOnPosition != null){
+                            Animal strongestAnimal = animalsFromStrongest.getFirst();
+
+                            LinkedList<Animal> strongestAnimalsList = animalsFromStrongest.stream()
+                                    .filter(an -> an.getEnergy() == strongestAnimal.getEnergy())
+                                    .collect(Collectors.toCollection(LinkedList::new));
+
+                            int energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
+
+                            strongestAnimalsList.forEach(an -> an.increaseEnergy(energyPartForAnimal));
+
+                            grassOnPosition.grassEaten();
+                        }
+
+                        if(animalsFromStrongest.size() >= 2){
+                            Animal parent1 = animalsFromStrongest.get(0);
+                            Animal parent2 = animalsFromStrongest.get(1);
+                            if(parent1.canReproduce() && parent2.canReproduce()){
+                                tryToReproduce(parent1, parent2);
+                            }
+                        }
                     }
                 }
         );
@@ -64,14 +126,12 @@ public class SafariMap extends AbstractWorldMap {
         return list.stream().filter((p) -> p instanceof Animal).map(Animal.class::cast).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public LinkedList<Animal> strongestAnimalsAtPosition(Vector2d position) {
-        LinkedList<Animal> animalsOnPosition = this.animalsOnPosition(position);
-        if (!animalsOnPosition.isEmpty()) {
-            final int maxEnergy = animalsOnPosition.stream().max(Animal::compareByEnergy).get().getEnergy();
-            return animalsOnPosition.stream().filter((p) -> p.getEnergy() == maxEnergy).collect(Collectors.toCollection(LinkedList::new));
-        }
-        else
-            return animalsOnPosition;
+    private LinkedList<Animal> animalsOnPositionFromStrongest(Vector2d position){
+        LinkedList<Animal> onPosition = this.animalsOnPosition(position);
+        onPosition.sort(
+                (a,b) -> -Animal.compareByEnergy(a,b)
+        );
+        return onPosition;
     }
 
     public Vector2d correctPosition(Vector2d requestedPosition){

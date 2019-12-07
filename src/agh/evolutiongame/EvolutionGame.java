@@ -2,6 +2,11 @@ package agh.evolutiongame;
 
 public class EvolutionGame implements Game {
     private SafariMap map;
+    private final int days;
+
+    public EvolutionGame(int days){
+        this.days = days;
+    }
 
     @Override
     public void start(IWorldMap map) {
@@ -10,8 +15,13 @@ public class EvolutionGame implements Game {
         else
             throw new IllegalArgumentException("Map " + map.getClass().getName() + " is incompatible with EvolutionGame");
         System.out.println(map.toString());
-        for(int i = 0; i < 200; i++){
+        for(int i = 0; i < days; i++){
             clearScreen();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             this.update();
         }
     }

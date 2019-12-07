@@ -11,17 +11,17 @@ public class JungleMap extends AbstractWorldMap {
 
     @Override
     public Vector2d correctPosition(Vector2d requestedPosition) {
-        return null;
+        return requestedPosition;
     }
 
     @Override
     public Vector2d getLowerLeft() {
-        return null;
+        return this.area.lowerLeft;
     }
 
     @Override
     public Vector2d getUpperRight() {
-        return null;
+        return this.area.lowerLeft;
     }
 
     @Override
