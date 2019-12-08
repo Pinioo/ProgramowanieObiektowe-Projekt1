@@ -20,7 +20,7 @@ public class EvolutionGame implements Game {
             System.out.println("Day: " + i);
             System.out.println("Animals on map: " + this.map.animalsCount());
             try {
-                Thread.sleep(400);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

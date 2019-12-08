@@ -6,7 +6,6 @@ public class Grass extends AbstractObservedMapElement {
     public Grass(IWorldMap map, Vector2d initialPosition, int caloricValue) {
         super(initialPosition);
         this.caloricValue = caloricValue;
-        this.addObserver(map);
         map.objectAdded(initialPosition, this);
     }
 

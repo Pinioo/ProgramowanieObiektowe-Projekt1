@@ -30,7 +30,8 @@ public class SafariMap extends AbstractWorldMap {
         do {
             randPosition = this.area.randPoint();
         }while(this.isOccupied(randPosition));
-        (new Animal(this, randPosition, startEnergy)).addObserver(this);
+        new Animal(this, randPosition, startEnergy)
+                .addObserver(this);
     }
 
     private Stream<IMapElement> allElementsStream(){
@@ -51,11 +52,13 @@ public class SafariMap extends AbstractWorldMap {
                 .count();
     }
 
-    private Set<Vector2d> occupiedPositions(){
-        return this.elementsHashMap.getMap().keySet();
+    private LinkedList<Vector2d> occupiedPositionsList(){
+        Stream<Vector2d> stream1 = this.elementsHashMap.getMap().keySet().stream();
+        Stream<Vector2d> stream2 = this.jungle.elementsHashMap.getMap().keySet().stream();
+        return Stream.concat(stream1, stream2).collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private ArrayList<Vector2d> allFreePositionsAround(Vector2d position){
+    private ArrayList<Vector2d> freePositionsAround(Vector2d position){
         return position.positionsAround().stream()
                 .filter(this::isPositionInside)
                 .filter(pos -> !this.isOccupied(pos))
@@ -64,18 +67,20 @@ public class SafariMap extends AbstractWorldMap {
 
     private Grass grassOnPosition(Vector2d position){
         for(IMapElement element: this.objectsAt(position)){
-            if(element instanceof Grass)
+            System.out.print(element.getClass().getName());
+            if(element instanceof Grass){
                 return (Grass)element;
+            }
         }
         return null;
     }
 
     private boolean tryToReproduce(Animal parent1, Animal parent2){
         if(parent1.canReproduce() && parent2.canReproduce()){
-            ArrayList<Vector2d> possiblePositions = this.allFreePositionsAround(parent1.position);
+            ArrayList<Vector2d> possiblePositions = this.freePositionsAround(parent1.position);
             if(!possiblePositions.isEmpty()){
                 int randIndex = (new Random()).nextInt(possiblePositions.size());
-                (new Animal(this, possiblePositions.get(randIndex), parent1, parent2))
+                new Animal(this, possiblePositions.get(randIndex), parent1, parent2)
                         .addObserver(this);
                 return true;
             }
@@ -110,7 +115,7 @@ public class SafariMap extends AbstractWorldMap {
             Animal parent1 = animalsFromStrongest.get(0);
             Animal parent2 = animalsFromStrongest.get(1);
             if(parent1.canReproduce() && parent2.canReproduce()){
-                tryToReproduce(parent1, parent2);
+                this.tryToReproduce(parent1, parent2);
             }
         }
     };
@@ -126,8 +131,7 @@ public class SafariMap extends AbstractWorldMap {
                     }
                 }
         );
-        LinkedList<Vector2d> occupiedPositions = new LinkedList<>(this.occupiedPositions());
-        occupiedPositions.forEach(
+        this.occupiedPositionsList().forEach(
                 position -> {
                     this.eatAtPosition(position);
                     this.reproduceAtPosition(position);
@@ -167,7 +171,7 @@ public class SafariMap extends AbstractWorldMap {
             do{
                 randPosition = this.area.randPoint();
             }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
-            new Grass(this, randPosition, caloricValue);
+            new Grass(this, randPosition, caloricValue).addObserver(this);
         }
     }
 

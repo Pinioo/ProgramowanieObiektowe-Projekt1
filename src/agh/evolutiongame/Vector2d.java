@@ -9,8 +9,6 @@ public class Vector2d {
     final public int x;
     final public int y;
 
-    static final private Random rand = new Random();
-
     public Vector2d(int x, int y){
         this.x = x;
         this.y = y;

@@ -12,14 +12,15 @@ public abstract class AbstractObservedMapElement implements IMapElement {
     }
 
     protected void positionChanged(Vector2d oldPosition, Vector2d newPosition){
-        for(IPositionChangedObserver observer : this.observersList){
-            observer.positionChanged(oldPosition, newPosition, this);
-        }
+        this.observersList.forEach(
+                obs -> obs.positionChanged(oldPosition, newPosition, this)
+        );
     }
 
     protected void remove() {
-        for(IPositionChangedObserver obs : this.observersList)
-            obs.objectRemoved(this.getPosition(), this);
+        this.observersList.forEach(
+                obs -> obs.objectRemoved(this.position, this)
+        );
     }
 
     public void addObserver(IPositionChangedObserver obs){

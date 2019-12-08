@@ -43,9 +43,7 @@ public class Animal extends AbstractObservedMapElement {
     public void moveForward(){
         Vector2d oldPosition = this.position;
         this.position = this.map.correctPosition(this.position.add(this.direction.toUnitVector()));
-        this.observersList.forEach(
-            obs -> obs.positionChanged(oldPosition, this.position, this)
-        );
+        this.positionChanged(oldPosition, this.position);
     }
 
     public boolean canReproduce(){

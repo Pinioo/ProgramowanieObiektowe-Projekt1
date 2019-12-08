@@ -21,12 +21,12 @@ public abstract class AbstractWorldMap implements IWorldMap{
     }
 
     protected void randGrass(int caloricValue){
-        if(this.elementsHashMap.getMap().size() < maxElements){
+        if(this.elementsHashMap.getMap().size() < this.maxElements){
             Vector2d randPosition;
             do{
                 randPosition = this.area.randPoint();
             }while(this.isOccupied(randPosition));
-            new Grass(this, randPosition, caloricValue);
+            new Grass(this, randPosition, caloricValue).addObserver(this);
         }
     }
 
