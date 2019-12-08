@@ -41,7 +41,14 @@ public class SafariMap extends AbstractWorldMap {
     }
 
     private Stream<Animal> allAnimalsStream(){
-        return this.allElementsStream().filter(p -> p instanceof Animal).map(Animal.class::cast);
+        return this.allElementsStream()
+                .filter(p -> p instanceof Animal)
+                .map(Animal.class::cast);
+    }
+
+    public int animalsCount(){
+        return (int) this.allAnimalsStream()
+                .count();
     }
 
     private Set<Vector2d> occupiedPositions(){
@@ -76,6 +83,38 @@ public class SafariMap extends AbstractWorldMap {
         return false;
     }
 
+    private void eatAtPosition(Vector2d position) {
+        Grass grassOnPosition = this.grassOnPosition(position);
+        if (grassOnPosition != null) {
+            LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
+            if (!animalsFromStrongest.isEmpty()) {
+                //Energy of the strongest animals
+                int maxEnergy = animalsFromStrongest.getFirst().getEnergy();
+
+                //Creating list of strongest animals which are about to be fed
+                LinkedList<Animal> strongestAnimalsList = animalsFromStrongest.stream()
+                        .filter(an -> an.getEnergy() == maxEnergy)
+                        .collect(Collectors.toCollection(LinkedList::new));
+
+                int energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
+                strongestAnimalsList.forEach(an -> an.increaseEnergy(energyPartForAnimal));
+
+                grassOnPosition.grassEaten();
+            }
+        }
+    }
+
+    private void reproduceAtPosition(Vector2d position){
+        LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
+        if(animalsFromStrongest.size() >= 2){
+            Animal parent1 = animalsFromStrongest.get(0);
+            Animal parent2 = animalsFromStrongest.get(1);
+            if(parent1.canReproduce() && parent2.canReproduce()){
+                tryToReproduce(parent1, parent2);
+            }
+        }
+    };
+
     public void newDay(){
         this.randGrass(this.grassEnergy);
         this.jungle.randGrass(this.grassEnergy);
@@ -90,31 +129,8 @@ public class SafariMap extends AbstractWorldMap {
         LinkedList<Vector2d> occupiedPositions = new LinkedList<>(this.occupiedPositions());
         occupiedPositions.forEach(
                 position -> {
-                    LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
-                    if(!animalsFromStrongest.isEmpty()){
-                        Grass grassOnPosition = this.grassOnPosition(position);
-                        if(grassOnPosition != null){
-                            Animal strongestAnimal = animalsFromStrongest.getFirst();
-
-                            LinkedList<Animal> strongestAnimalsList = animalsFromStrongest.stream()
-                                    .filter(an -> an.getEnergy() == strongestAnimal.getEnergy())
-                                    .collect(Collectors.toCollection(LinkedList::new));
-
-                            int energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
-
-                            strongestAnimalsList.forEach(an -> an.increaseEnergy(energyPartForAnimal));
-
-                            grassOnPosition.grassEaten();
-                        }
-
-                        if(animalsFromStrongest.size() >= 2){
-                            Animal parent1 = animalsFromStrongest.get(0);
-                            Animal parent2 = animalsFromStrongest.get(1);
-                            if(parent1.canReproduce() && parent2.canReproduce()){
-                                tryToReproduce(parent1, parent2);
-                            }
-                        }
-                    }
+                    this.eatAtPosition(position);
+                    this.reproduceAtPosition(position);
                 }
         );
     }
@@ -123,7 +139,10 @@ public class SafariMap extends AbstractWorldMap {
         LinkedList<IMapElement> list = this.objectsAt(position);
         if (list == null)
             return new LinkedList<>();
-        return list.stream().filter((p) -> p instanceof Animal).map(Animal.class::cast).collect(Collectors.toCollection(LinkedList::new));
+        return list.stream()
+                .filter((p) -> p instanceof Animal)
+                .map(Animal.class::cast)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     private LinkedList<Animal> animalsOnPositionFromStrongest(Vector2d position){

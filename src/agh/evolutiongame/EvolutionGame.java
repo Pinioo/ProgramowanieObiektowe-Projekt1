@@ -1,35 +1,35 @@
 package agh.evolutiongame;
 
+import java.io.IOException;
+
 public class EvolutionGame implements Game {
     private SafariMap map;
     private final int days;
 
-    public EvolutionGame(int days){
+    public EvolutionGame(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals, int days){
+        this.map = new SafariMap(width, height, jungleRatio, grassEnergy, moveEnergy, startEnergy, randomAnimals);
         this.days = days;
     }
 
     @Override
-    public void start(IWorldMap map) {
-        if(map instanceof SafariMap)
-            this.map = (SafariMap)map;
-        else
-            throw new IllegalArgumentException("Map " + map.getClass().getName() + " is incompatible with EvolutionGame");
-        System.out.println(map.toString());
-        for(int i = 0; i < days; i++){
+    public void start() {
+        for(int i = 1; i <= days; i++){
             clearScreen();
+            this.update();
+            this.drawMap();
+            System.out.println("Day: " + i);
+            System.out.println("Animals on map: " + this.map.animalsCount());
             try {
-                Thread.sleep(100);
+                Thread.sleep(400);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            this.update();
         }
     }
 
     @Override
     public void update() {
         this.map.newDay();
-        System.out.println(map.toString());
     }
 
     @Override
@@ -37,8 +37,15 @@ public class EvolutionGame implements Game {
 
     }
 
+    public void drawMap() {
+        System.out.println(this.map);
+    }
+
     public static void clearScreen() {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }

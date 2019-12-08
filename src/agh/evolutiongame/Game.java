@@ -1,7 +1,7 @@
 package agh.evolutiongame;
 
 public interface Game {
-    void start(IWorldMap map);
+    void start();
     void update();
     void end();
 }
