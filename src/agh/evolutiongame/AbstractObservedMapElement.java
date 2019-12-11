@@ -1,5 +1,8 @@
 package agh.evolutiongame;
 
+import agh.evolutiongame.interfaces.IMapElement;
+import agh.evolutiongame.interfaces.IPositionChangedObserver;
+
 import java.util.LinkedList;
 
 public abstract class AbstractObservedMapElement implements IMapElement {

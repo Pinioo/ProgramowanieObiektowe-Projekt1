@@ -1,7 +1,7 @@
 package agh.evolutiongame;
 
-import java.util.Comparator;
-import java.util.Map;
+import agh.evolutiongame.interfaces.IWorldMap;
+
 import java.util.Random;
 
 public class Animal extends AbstractObservedMapElement {

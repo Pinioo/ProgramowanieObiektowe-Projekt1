@@ -1,9 +1,8 @@
 package agh.evolutiongame;
 
-import javax.naming.SizeLimitExceededException;
-import javax.swing.*;
+import agh.evolutiongame.interfaces.IMapElement;
+
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,7 +66,6 @@ public class SafariMap extends AbstractWorldMap {
 
     private Grass grassOnPosition(Vector2d position){
         for(IMapElement element: this.objectsAt(position)){
-            System.out.print(element.getClass().getName());
             if(element instanceof Grass){
                 return (Grass)element;
             }

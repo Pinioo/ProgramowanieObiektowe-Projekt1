@@ -1,26 +1,31 @@
 package agh.evolutiongame;
 
+import agh.evolutiongame.interfaces.Game;
+
 import java.io.IOException;
 
 public class EvolutionGame implements Game {
     private SafariMap map;
     private final int days;
 
-    public EvolutionGame(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals, int days){
-        this.map = new SafariMap(width, height, jungleRatio, grassEnergy, moveEnergy, startEnergy, randomAnimals);
-        this.days = days;
+    public EvolutionGame(GameParameters parameters){
+        if(parameters.map instanceof SafariMap)
+            this.map = (SafariMap)parameters.map;
+        else
+            throw new IllegalArgumentException("Evolution game's map must be SafariMap!");
+        this.days = parameters.days;
     }
 
     @Override
     public void start() {
         for(int i = 1; i <= days; i++){
-            clearScreen();
             this.update();
+            clearScreen();
             this.drawMap();
             System.out.println("Day: " + i);
             System.out.println("Animals on map: " + this.map.animalsCount());
             try {
-                Thread.sleep(2000);
+                Thread.sleep(30);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

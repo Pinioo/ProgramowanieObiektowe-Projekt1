@@ -1,9 +1,11 @@
 package agh.evolutiongame;
 
-import java.util.HashMap;
+import agh.evolutiongame.interfaces.IMapElement;
+import agh.evolutiongame.interfaces.IWorldMap;
+
 import java.util.LinkedList;
 
-public abstract class AbstractWorldMap implements IWorldMap{
+public abstract class AbstractWorldMap implements IWorldMap {
     protected ListsHashMap<Vector2d, IMapElement> elementsHashMap = new ListsHashMap<>();
 
     protected final Rectangle area;

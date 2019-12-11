@@ -1,5 +1,7 @@
 package agh.evolutiongame;
 
+import agh.evolutiongame.interfaces.IWorldMap;
+
 public class Grass extends AbstractObservedMapElement {
     private final int caloricValue;
 

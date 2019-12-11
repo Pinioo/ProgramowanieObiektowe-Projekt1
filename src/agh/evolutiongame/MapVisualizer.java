@@ -1,6 +1,6 @@
 package agh.evolutiongame;
 
-import java.util.LinkedList;
+import agh.evolutiongame.interfaces.IWorldMap;
 
 /**
  * The map visualizer converts the {@link IWorldMap} map into a string

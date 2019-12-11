@@ -1,4 +1,6 @@
-package agh.evolutiongame;
+package agh.evolutiongame.interfaces;
+
+import agh.evolutiongame.Vector2d;
 
 import java.util.LinkedList;
 
