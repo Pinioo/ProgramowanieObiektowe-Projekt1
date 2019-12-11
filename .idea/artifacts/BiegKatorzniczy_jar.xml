@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Bieg katorżniczy:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/Bieg_katorniczy_jar</output-path>
+  <artifact type="jar" name="BiegKatorzniczy:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BiegKatorzniczy_jar</output-path>
     <root id="archive" name="Bieg katorżniczy.jar">
       <element id="module-output" name="Bieg katorżniczy" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar" path-in-jar="/" />
