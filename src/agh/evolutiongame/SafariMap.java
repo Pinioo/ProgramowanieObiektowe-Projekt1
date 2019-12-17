@@ -12,9 +12,10 @@ public class SafariMap extends AbstractWorldMap {
     private final int moveEnergy;
 
     public SafariMap(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals){
-        super(new Vector2d(0,0), new Vector2d(width, height));
+        super(new Vector2d(0,0), new Vector2d(width-1, height-1));
         this.jungle = new JungleMap(this.area.scale(jungleRatio));
         this.maxElements -= this.jungle.maxElements;
+        this.freePositions.removeIf(position -> this.jungle.isPositionInside(position));
 
         this.grassEnergy = grassEnergy;
         this.moveEnergy = moveEnergy;
@@ -51,10 +52,10 @@ public class SafariMap extends AbstractWorldMap {
                 .count();
     }
 
-    private LinkedList<Vector2d> occupiedPositionsList(){
+    private ArrayList<Vector2d> occupiedPositionsList(){
         Stream<Vector2d> stream1 = this.elementsHashMap.getMap().keySet().stream();
         Stream<Vector2d> stream2 = this.jungle.elementsHashMap.getMap().keySet().stream();
-        return Stream.concat(stream1, stream2).collect(Collectors.toCollection(LinkedList::new));
+        return Stream.concat(stream1, stream2).collect(Collectors.toCollection(ArrayList::new));
     }
 
     private ArrayList<Vector2d> freePositionsAround(Vector2d position){
@@ -86,18 +87,13 @@ public class SafariMap extends AbstractWorldMap {
         return false;
     }
 
+    // If grass is at position -> split it between all the strongest animals
     private void eatAtPosition(Vector2d position) {
         Grass grassOnPosition = this.grassOnPosition(position);
         if (grassOnPosition != null) {
-            LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
-            if (!animalsFromStrongest.isEmpty()) {
-                //Energy of the strongest animals
-                int maxEnergy = animalsFromStrongest.getFirst().getEnergy();
-
-                //Creating list of strongest animals which are about to be fed
-                LinkedList<Animal> strongestAnimalsList = animalsFromStrongest.stream()
-                        .filter(an -> an.getEnergy() == maxEnergy)
-                        .collect(Collectors.toCollection(LinkedList::new));
+            LinkedList<Animal> animals = this.animalsOnPosition(position);
+            if (!animals.isEmpty()) {
+                LinkedList<Animal> strongestAnimalsList = strongestAnimalsOnPosition(position);
 
                 int energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
                 strongestAnimalsList.forEach(an -> an.increaseEnergy(energyPartForAnimal));
@@ -107,23 +103,47 @@ public class SafariMap extends AbstractWorldMap {
         }
     }
 
+    private Animal[] findTwoStrongest(Vector2d position){
+        LinkedList<Animal> strongestAnimals = this.strongestAnimalsOnPosition(position);
+        if (strongestAnimals.isEmpty())
+            return null;
+        if (strongestAnimals.size() >= 2){
+            return new Animal[]{strongestAnimals.get(0), strongestAnimals.get(1)};
+        }
+        else{
+            Animal strongest = strongestAnimals.get(0);
+            LinkedList<Animal> allAnimals = this.animalsOnPosition(position);
+            if (allAnimals.size() >= 2) {
+                Animal secondStrongest = allAnimals.stream()
+                        .filter(an -> an != strongest)
+                        .max(Animal::compareByEnergy)
+                        .get();
+                return new Animal[]{strongest, secondStrongest};
+            }
+        }
+        return null;
+    }
+
+    // If the two strongest animals can reproduce -> do it
     private void reproduceAtPosition(Vector2d position){
-        LinkedList<Animal> animalsFromStrongest = this.animalsOnPositionFromStrongest(position);
-        if(animalsFromStrongest.size() >= 2){
-            Animal parent1 = animalsFromStrongest.get(0);
-            Animal parent2 = animalsFromStrongest.get(1);
+        Animal[] twoStrongest = this.findTwoStrongest(position);
+        if(twoStrongest != null){
+            Animal parent1 = twoStrongest[0];
+            Animal parent2 = twoStrongest[1];
             if(parent1.canReproduce() && parent2.canReproduce()){
                 this.tryToReproduce(parent1, parent2);
             }
         }
     };
 
+    // New day activities
     public void newDay(){
         this.randGrass(this.grassEnergy);
         this.jungle.randGrass(this.grassEnergy);
         this.allAnimalsStream().forEach(
                 an -> {
                     if(!an.decreaseEnergy(this.moveEnergy)) {
+                        // If animal hasn't died
                         an.randomRotate();
                         an.moveForward();
                     }
@@ -137,6 +157,7 @@ public class SafariMap extends AbstractWorldMap {
         );
     }
 
+    // List of animals at position
     public LinkedList<Animal> animalsOnPosition(Vector2d position){
         LinkedList<IMapElement> list = this.objectsAt(position);
         if (list == null)
@@ -147,14 +168,21 @@ public class SafariMap extends AbstractWorldMap {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private LinkedList<Animal> animalsOnPositionFromStrongest(Vector2d position){
-        LinkedList<Animal> onPosition = this.animalsOnPosition(position);
-        onPosition.sort(
-                (a,b) -> -Animal.compareByEnergy(a,b)
-        );
-        return onPosition;
+    public LinkedList<Animal> strongestAnimalsOnPosition(Vector2d position){
+        LinkedList<Animal> animals = this.animalsOnPosition(position);
+
+        if(animals.isEmpty())
+            return animals;
+
+        int maxEnergy = animals.stream()
+                .max(Animal::compareByEnergy).get().getEnergy();
+
+        return animals.stream()
+                .filter(an -> an.getEnergy() == maxEnergy).collect(Collectors.toCollection(LinkedList::new));
+
     }
 
+    // If position went out of area's range -> return position on the opposite side
     public Vector2d correctPosition(Vector2d requestedPosition){
         return new Vector2d(
                 Math.floorMod(requestedPosition.getX(), this.area.upperRight.getX() + 1),
@@ -164,11 +192,21 @@ public class SafariMap extends AbstractWorldMap {
 
     @Override
     protected void randGrass(int caloricValue){
-        if(this.elementsHashMap.getMap().size() < this.maxElements){
+        int mapElements = this.elementsHashMap.size();
+        if(mapElements < this.maxElements){
             Vector2d randPosition;
-            do{
-                randPosition = this.area.randPoint();
-            }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
+            // If map is filled in less then 70% -> brute force randomizing position
+            if (mapElements < 0.7 * this.maxElements) {
+                do{
+                    randPosition = this.area.randPoint();
+                    // Position must be free and not in jungle
+                }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
+            }
+            // If map is filled in more then 70% -> taking random from free positions' list
+            else{
+                ArrayList<Vector2d> freePositionsList = new ArrayList<>(this.freePositions);
+                randPosition = freePositionsList.get(new Random().nextInt(freePositionsList.size()));
+            }
             new Grass(this, randPosition, caloricValue).addObserver(this);
         }
     }

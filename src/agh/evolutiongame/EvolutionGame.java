@@ -1,34 +1,59 @@
 package agh.evolutiongame;
 
 import agh.evolutiongame.interfaces.Game;
-
-import java.io.IOException;
+import org.w3c.dom.xpath.XPathResult;
 
 public class EvolutionGame implements Game {
     private SafariMap map;
-    private final int days;
+    private int days;
+    private int delay;
+    private GameParameters parameters;
 
     public EvolutionGame(GameParameters parameters){
-        if(parameters.map instanceof SafariMap)
-            this.map = (SafariMap)parameters.map;
-        else
-            throw new IllegalArgumentException("Evolution game's map must be SafariMap!");
+        this.map = new SafariMap(
+                parameters.width,
+                parameters.height,
+                parameters.jungleRatio,
+                parameters.grassEnergy,
+                parameters.moveEnergy,
+                parameters.startEnergy,
+                parameters.randomAnimals
+        );
+        this.parameters = parameters;
         this.days = parameters.days;
+        this.delay = parameters.delay;
     }
 
     @Override
     public void start() {
+        long startTime;
+        long endTime;
+        long duration;
         for(int i = 1; i <= days; i++){
+            // Timer for update() call
+            startTime = System.currentTimeMillis();
             this.update();
-            clearScreen();
+            endTime = System.currentTimeMillis();
+
+            // If update time was less than delay -> wait for difference of delay and method call time
+            duration = endTime - startTime;
+            if(delay - duration > 0){
+                try {
+                    Thread.sleep(delay - duration);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Clear the screen and show updated map
+            ScreenCleaner.clear();
             this.drawMap();
+            System.out.println();
+
+            // Show additional stats
             System.out.println("Day: " + i);
             System.out.println("Animals on map: " + this.map.animalsCount());
-            try {
-                Thread.sleep(30);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
         }
     }
 
@@ -42,15 +67,15 @@ public class EvolutionGame implements Game {
 
     }
 
-    public void drawMap() {
+    public SafariMap getMap(){
+        return this.map;
+    }
+
+    private void drawMap() {
         System.out.println(this.map);
     }
 
-    public static void clearScreen() {
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
+    public GameParameters getParameters() {
+        return parameters;
     }
 }

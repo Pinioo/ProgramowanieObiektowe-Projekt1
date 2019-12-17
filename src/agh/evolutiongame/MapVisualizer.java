@@ -35,8 +35,7 @@ public class MapVisualizer {
         for (int i = upperRight.y; i >= lowerLeft.y; i--) {
             for (int j = lowerLeft.x; j <= upperRight.x; j++) {
                 builder.append(CELL_SEGMENT);
-                if (j <= upperRight.x)
-                    builder.append(drawObject(new Vector2d(j, i)));
+                builder.append(drawObject(new Vector2d(j, i)));
             }
             builder.append(CELL_SEGMENT);
             builder.append(System.lineSeparator());

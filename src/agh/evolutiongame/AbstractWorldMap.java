@@ -3,10 +3,11 @@ package agh.evolutiongame;
 import agh.evolutiongame.interfaces.IMapElement;
 import agh.evolutiongame.interfaces.IWorldMap;
 
-import java.util.LinkedList;
+import java.util.*;
 
 public abstract class AbstractWorldMap implements IWorldMap {
     protected ListsHashMap<Vector2d, IMapElement> elementsHashMap = new ListsHashMap<>();
+    protected HashSet<Vector2d> freePositions;
 
     protected final Rectangle area;
 
@@ -14,20 +15,32 @@ public abstract class AbstractWorldMap implements IWorldMap {
 
     protected AbstractWorldMap(Vector2d lowerLeft, Vector2d upperRight) {
         this.area = new Rectangle(lowerLeft, upperRight);
-        maxElements = (this.area.upperRight.x - this.area.lowerLeft.x + 1)*(this.area.upperRight.y - this.area.lowerLeft.y + 1);
+        freePositions = this.area.positionsSet();
+        maxElements = this.area.area();
     }
 
     protected AbstractWorldMap(Rectangle area){
         this.area = area;
-        maxElements = (this.area.upperRight.x - this.area.lowerLeft.x + 1)*(this.area.upperRight.y - this.area.lowerLeft.y + 1);
+        freePositions = this.area.positionsSet();
+        maxElements = this.area.area();
     }
 
+    // If map is not full places new grass
     protected void randGrass(int caloricValue){
-        if(this.elementsHashMap.getMap().size() < this.maxElements){
+        int mapElements = this.elementsHashMap.size();
+        if(mapElements < this.maxElements){
             Vector2d randPosition;
-            do{
-                randPosition = this.area.randPoint();
-            }while(this.isOccupied(randPosition));
+            // If map is filled in less then 70% -> brute force randomizing position
+            if (mapElements < 0.7 * this.maxElements) {
+                do{
+                    randPosition = this.area.randPoint();
+                }while(this.isOccupied(randPosition));
+            }
+            // If map is filled in more then 70% -> taking random from free positions' list
+            else{
+                ArrayList<Vector2d> freePositionsList = new ArrayList<>(this.freePositions);
+                randPosition = freePositionsList.get(new Random().nextInt(freePositionsList.size()));
+            }
             new Grass(this, randPosition, caloricValue).addObserver(this);
         }
     }
@@ -45,16 +58,20 @@ public abstract class AbstractWorldMap implements IWorldMap {
     @Override
     public void objectRemoved(Vector2d position, IMapElement element) {
         this.elementsHashMap.remove(position, element);
+        if(!this.isOccupied(position))
+            this.freePositions.add(position);
     }
 
     @Override
     public void objectAdded(Vector2d position, IMapElement element) {
+        if(!isOccupied(position))
+            this.freePositions.remove(position);
         this.elementsHashMap.put(position, element);
     }
 
     @Override
     public boolean isOccupied(Vector2d position) {
-        return this.objectsAt(position) != null;
+        return this.elementsHashMap.getMap().containsKey(position);
     }
 
     @Override
