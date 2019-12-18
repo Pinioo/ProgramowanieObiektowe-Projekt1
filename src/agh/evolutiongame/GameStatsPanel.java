@@ -16,7 +16,9 @@ public class GameStatsPanel extends JPanel {
         this.animalCountLabel = new JLabel();
         this.dayLabel = new JLabel();
 
-        this.setBackground(new Color(143, 140, 134));
+        this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+
+        this.setBackground(new Color(209, 206, 200));
 
         this.add(animalCountLabel);
         this.add(dayLabel);

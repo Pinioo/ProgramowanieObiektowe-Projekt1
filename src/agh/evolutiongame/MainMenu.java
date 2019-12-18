@@ -77,8 +77,7 @@ public class MainMenu {
     }
 
     private void showConfiguration() throws IllegalStateException, IOException, ParseException {
-        GameParameters currentConfig = null;
-        currentConfig = ParametersParser.jsonToParams(configFile);
+        GameParameters currentConfig = ParametersParser.jsonToParams(this.configFile);
         ScreenCleaner.clear();
         System.out.println("Current settings:");
         for(Field f : GameParameters.class.getFields()){

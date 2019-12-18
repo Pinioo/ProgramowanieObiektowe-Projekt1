@@ -11,8 +11,8 @@ public class SwingGamePanel extends JPanel {
     private int cellHeight;
     private int cellWidth;
     private EvolutionGame currentGame;
-    private Color emptyColor = new Color(143, 140, 134);
-    private Color grassColor =  new Color(50, 218, 50);
+    private Color emptyColor = new Color(209, 206, 200);
+    private Color grassColor =  new Color(45, 179, 45);
     private Color animalColor = new Color(230, 25, 5);
 
     SwingGamePanel(EvolutionGame game){

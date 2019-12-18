@@ -38,8 +38,8 @@ public class SwingAnimatedGame extends JFrame {
 
         myTimer = new Timer(this.currentGame.getParameters().delay, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                statsPanel.updateStats();
                 currentGame.update();
+                statsPanel.updateStats();
                 panel.repaint();
                 if (currentGame.getCurrentDay() > currentGame.getParameters().days)
                     ((Timer)e.getSource()).stop();
