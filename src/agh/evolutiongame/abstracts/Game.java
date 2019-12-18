@@ -1,4 +1,4 @@
-package agh.evolutiongame.interfaces;
+package agh.evolutiongame.abstracts;
 
 public interface Game {
     void start();

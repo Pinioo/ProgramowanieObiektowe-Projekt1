@@ -1,4 +1,4 @@
-package agh.evolutiongame;
+package agh.evolutiongame.parameters;
 
 public class GameParameters {
     public int width;

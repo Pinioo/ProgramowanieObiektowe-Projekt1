@@ -1,8 +1,10 @@
-package agh.evolutiongame;
+package agh.evolutiongame.mapelements;
 
-import agh.evolutiongame.interfaces.IWorldMap;
-
-import java.util.Random;
+import agh.evolutiongame.Genome;
+import agh.evolutiongame.spatialclasses.MapDirection;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IWorldMap;
+import agh.evolutiongame.abstracts.AbstractObservedMapElement;
 
 public class Animal extends AbstractObservedMapElement {
     private MapDirection direction;

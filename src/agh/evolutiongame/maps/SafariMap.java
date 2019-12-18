@@ -1,6 +1,10 @@
-package agh.evolutiongame;
+package agh.evolutiongame.maps;
 
-import agh.evolutiongame.interfaces.IMapElement;
+import agh.evolutiongame.abstracts.AbstractWorldMap;
+import agh.evolutiongame.mapelements.Animal;
+import agh.evolutiongame.mapelements.Grass;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IMapElement;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,7 +18,7 @@ public class SafariMap extends AbstractWorldMap {
     public SafariMap(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals){
         super(new Vector2d(0,0), new Vector2d(width-1, height-1));
         this.jungle = new JungleMap(this.area.scale(jungleRatio));
-        this.maxElements -= this.jungle.maxElements;
+        this.maxElements -= this.jungle.getMaxElements();
         this.freePositions.removeIf(position -> this.jungle.isPositionInside(position));
 
         this.grassEnergy = grassEnergy;
@@ -35,8 +39,8 @@ public class SafariMap extends AbstractWorldMap {
     }
 
     private Stream<IMapElement> allElementsStream(){
-        Stream<IMapElement> stream1 = this.elementsHashMap.allElementsList().stream();
-        Stream<IMapElement> stream2 = this.jungle.elementsHashMap.allElementsList().stream();
+        Stream<IMapElement> stream1 = this.getElementsHashMap().allElementsList().stream();
+        Stream<IMapElement> stream2 = this.jungle.getElementsHashMap().allElementsList().stream();
 
         return Stream.concat(stream1, stream2);
     }
@@ -53,8 +57,8 @@ public class SafariMap extends AbstractWorldMap {
     }
 
     private ArrayList<Vector2d> occupiedPositionsList(){
-        Stream<Vector2d> stream1 = this.elementsHashMap.getMap().keySet().stream();
-        Stream<Vector2d> stream2 = this.jungle.elementsHashMap.getMap().keySet().stream();
+        Stream<Vector2d> stream1 = this.getElementsHashMap().getMap().keySet().stream();
+        Stream<Vector2d> stream2 = this.jungle.getElementsHashMap().getMap().keySet().stream();
         return Stream.concat(stream1, stream2).collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -76,7 +80,7 @@ public class SafariMap extends AbstractWorldMap {
 
     private boolean tryToReproduce(Animal parent1, Animal parent2){
         if(parent1.canReproduce() && parent2.canReproduce()){
-            ArrayList<Vector2d> possiblePositions = this.freePositionsAround(parent1.position);
+            ArrayList<Vector2d> possiblePositions = this.freePositionsAround(parent1.getPosition());
             if(!possiblePositions.isEmpty()){
                 int randIndex = (new Random()).nextInt(possiblePositions.size());
                 new Animal(this, possiblePositions.get(randIndex), parent1, parent2)

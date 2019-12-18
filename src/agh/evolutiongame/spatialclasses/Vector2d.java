@@ -1,9 +1,6 @@
-package agh.evolutiongame;
+package agh.evolutiongame.spatialclasses;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Random;
-import java.util.Vector;
 
 public class Vector2d {
     final public int x;

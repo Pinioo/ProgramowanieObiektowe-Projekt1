@@ -1,4 +1,4 @@
-package agh.evolutiongame;
+package agh.evolutiongame.spatialclasses;
 
 import java.util.Random;
 

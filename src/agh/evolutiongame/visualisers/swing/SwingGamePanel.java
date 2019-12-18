@@ -1,6 +1,9 @@
-package agh.evolutiongame;
+package agh.evolutiongame.visualisers.swing;
 
-import agh.evolutiongame.interfaces.IMapElement;
+import agh.evolutiongame.EvolutionGame;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IMapElement;
+import agh.evolutiongame.mapelements.Grass;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,7 +60,7 @@ public class SwingGamePanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        for (Vector2d position : this.currentGame.getMap().area.positionsSet()){
+        for (Vector2d position : this.currentGame.getMap().getArea().positionsSet()){
             g2d.setColor(this.colorAtPosition(position));
             Rectangle toDrawRect = new Rectangle(
                     position.getX() * this.cellWidth,

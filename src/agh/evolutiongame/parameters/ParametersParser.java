@@ -1,4 +1,4 @@
-package agh.evolutiongame;
+package agh.evolutiongame.parameters;
 
 import org.json.simple.*;
 import org.json.simple.parser.JSONParser;

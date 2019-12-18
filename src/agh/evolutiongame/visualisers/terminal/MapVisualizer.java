@@ -1,6 +1,7 @@
-package agh.evolutiongame;
+package agh.evolutiongame.visualisers.terminal;
 
-import agh.evolutiongame.interfaces.IWorldMap;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IWorldMap;
 
 /**
  * The map visualizer converts the {@link IWorldMap} map into a string

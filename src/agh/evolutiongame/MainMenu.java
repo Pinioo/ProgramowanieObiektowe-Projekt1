@@ -1,9 +1,12 @@
 package agh.evolutiongame;
 
-import agh.evolutiongame.interfaces.Game;
+import agh.evolutiongame.abstracts.Game;
+import agh.evolutiongame.parameters.GameParameters;
+import agh.evolutiongame.parameters.ParametersParser;
+import agh.evolutiongame.visualisers.swing.SwingAnimatedGame;
+import agh.evolutiongame.visualisers.terminal.ScreenCleaner;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;

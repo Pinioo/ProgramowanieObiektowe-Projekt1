@@ -1,6 +1,6 @@
-package agh.evolutiongame.interfaces;
+package agh.evolutiongame.abstracts;
 
-import agh.evolutiongame.Vector2d;
+import agh.evolutiongame.spatialclasses.Vector2d;
 
 public interface IPositionChangedObserver {
     void positionChanged(Vector2d oldPosition, Vector2d newPosition, IMapElement element);

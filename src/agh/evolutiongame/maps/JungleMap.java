@@ -1,4 +1,8 @@
-package agh.evolutiongame;
+package agh.evolutiongame.maps;
+
+import agh.evolutiongame.abstracts.AbstractWorldMap;
+import agh.evolutiongame.spatialclasses.Rectangle;
+import agh.evolutiongame.spatialclasses.Vector2d;
 
 public class JungleMap extends AbstractWorldMap {
     public JungleMap(Vector2d lowerLeft, Vector2d upperRight) {
@@ -7,6 +11,10 @@ public class JungleMap extends AbstractWorldMap {
 
     public JungleMap(Rectangle area){
         super(area);
+    }
+
+    public void randGrass(int caloricValue){
+        super.randGrass(caloricValue);
     }
 
     @Override

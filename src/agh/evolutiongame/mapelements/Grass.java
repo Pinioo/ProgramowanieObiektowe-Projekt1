@@ -1,6 +1,8 @@
-package agh.evolutiongame;
+package agh.evolutiongame.mapelements;
 
-import agh.evolutiongame.interfaces.IWorldMap;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IWorldMap;
+import agh.evolutiongame.abstracts.AbstractObservedMapElement;
 
 public class Grass extends AbstractObservedMapElement {
     private final int caloricValue;

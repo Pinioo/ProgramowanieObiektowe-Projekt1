@@ -1,7 +1,8 @@
-package agh.evolutiongame;
+package agh.evolutiongame.abstracts;
 
-import agh.evolutiongame.interfaces.IMapElement;
-import agh.evolutiongame.interfaces.IPositionChangedObserver;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.abstracts.IMapElement;
+import agh.evolutiongame.abstracts.IPositionChangedObserver;
 
 import java.util.LinkedList;
 

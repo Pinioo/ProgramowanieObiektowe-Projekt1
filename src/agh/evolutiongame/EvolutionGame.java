@@ -1,7 +1,9 @@
 package agh.evolutiongame;
 
-import agh.evolutiongame.interfaces.Game;
-import org.w3c.dom.xpath.XPathResult;
+import agh.evolutiongame.abstracts.Game;
+import agh.evolutiongame.maps.SafariMap;
+import agh.evolutiongame.parameters.GameParameters;
+import agh.evolutiongame.visualisers.terminal.ScreenCleaner;
 
 public class EvolutionGame implements Game {
     private SafariMap map;

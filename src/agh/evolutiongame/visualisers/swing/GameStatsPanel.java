@@ -1,4 +1,6 @@
-package agh.evolutiongame;
+package agh.evolutiongame.visualisers.swing;
+
+import agh.evolutiongame.EvolutionGame;
 
 import javax.swing.*;
 import java.awt.*;

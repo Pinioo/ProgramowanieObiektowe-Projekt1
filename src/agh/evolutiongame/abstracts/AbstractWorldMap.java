@@ -1,7 +1,12 @@
-package agh.evolutiongame;
+package agh.evolutiongame.abstracts;
 
-import agh.evolutiongame.interfaces.IMapElement;
-import agh.evolutiongame.interfaces.IWorldMap;
+import agh.evolutiongame.*;
+import agh.evolutiongame.abstracts.IMapElement;
+import agh.evolutiongame.abstracts.IWorldMap;
+import agh.evolutiongame.mapelements.Grass;
+import agh.evolutiongame.spatialclasses.Rectangle;
+import agh.evolutiongame.spatialclasses.Vector2d;
+import agh.evolutiongame.visualisers.terminal.MapVisualizer;
 
 import java.util.*;
 
@@ -84,4 +89,16 @@ public abstract class AbstractWorldMap implements IWorldMap {
         MapVisualizer visual = new MapVisualizer(this);
         return visual.draw(this.getLowerLeft(), this.getUpperRight());
     }
+
+    public Rectangle getArea(){
+        return  this.area;
+    }
+
+    public ListsHashMap<Vector2d, IMapElement> getElementsHashMap() {
+        return elementsHashMap;
+    }
+
+    public int getMaxElements(){
+        return this.maxElements;
+    };
 }

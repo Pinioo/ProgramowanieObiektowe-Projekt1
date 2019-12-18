@@ -1,4 +1,4 @@
-package agh.evolutiongame;
+package agh.evolutiongame.visualisers.terminal;
 
 import java.io.IOException;
 
