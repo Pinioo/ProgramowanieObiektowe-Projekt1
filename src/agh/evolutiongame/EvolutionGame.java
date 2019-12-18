@@ -6,6 +6,7 @@ import org.w3c.dom.xpath.XPathResult;
 public class EvolutionGame implements Game {
     private SafariMap map;
     private int days;
+    private int currentDay;
     private int delay;
     private GameParameters parameters;
 
@@ -29,7 +30,7 @@ public class EvolutionGame implements Game {
         long startTime;
         long endTime;
         long duration;
-        for(int i = 1; i <= days; i++){
+        while (currentDay < days){
             // Timer for update() call
             startTime = System.currentTimeMillis();
             this.update();
@@ -51,7 +52,7 @@ public class EvolutionGame implements Game {
             System.out.println();
 
             // Show additional stats
-            System.out.println("Day: " + i);
+            System.out.println("Day: " + currentDay);
             System.out.println("Animals on map: " + this.map.animalsCount());
 
         }
@@ -60,6 +61,7 @@ public class EvolutionGame implements Game {
     @Override
     public void update() {
         this.map.newDay();
+        currentDay++;
     }
 
     @Override
@@ -76,6 +78,10 @@ public class EvolutionGame implements Game {
     }
 
     public GameParameters getParameters() {
-        return parameters;
+        return this.parameters;
+    }
+
+    public int getCurrentDay(){
+        return this.currentDay;
     }
 }

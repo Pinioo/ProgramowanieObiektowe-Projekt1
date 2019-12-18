@@ -19,14 +19,6 @@ public class MainMenu {
     private MainMenu(){
         Scanner in = new Scanner(System.in);
 
-        // Checks for configFile
-        // If none is present creates default one
-        if(!(new File(configFile).exists())){
-            ParametersParser.createDefaultJson(configFile);
-            System.out.println("No parameters.json file found, default one was created!");
-            System.out.println();
-        }
-
         // Takes input until user provides valid option
         String choice;
         do{
@@ -63,9 +55,8 @@ public class MainMenu {
             // To exit switch in main menu
         } catch (ParseException | IOException e) {
             // Exception cause by missing or corrupted configFile
-            System.out.println(e.getMessage());
             ParametersParser.createDefaultJson(this.configFile);
-            System.out.println("No " + this.configFile + " file found, default one was created!");
+            System.out.println("No valid " + this.configFile + " file found, default one was created!");
             System.out.println();
         }
     }

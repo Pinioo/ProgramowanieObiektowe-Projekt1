@@ -195,14 +195,14 @@ public class SafariMap extends AbstractWorldMap {
         int mapElements = this.elementsHashMap.size();
         if(mapElements < this.maxElements){
             Vector2d randPosition;
-            // If map is filled in less then 70% -> brute force randomizing position
-            if (mapElements < 0.7 * this.maxElements) {
+            // If map is filled in less then 80% -> brute force randomizing position
+            if (mapElements < 0.8 * this.maxElements) {
                 do{
                     randPosition = this.area.randPoint();
                     // Position must be free and not in jungle
                 }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
             }
-            // If map is filled in more then 70% -> taking random from free positions' list
+            // If map is filled in more then 80% -> taking random from free positions' list
             else{
                 ArrayList<Vector2d> freePositionsList = new ArrayList<>(this.freePositions);
                 randPosition = freePositionsList.get(new Random().nextInt(freePositionsList.size()));
