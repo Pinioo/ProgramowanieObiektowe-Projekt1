@@ -5,9 +5,9 @@ import agh.evolutiongame.abstracts.IWorldMap;
 import agh.evolutiongame.abstracts.AbstractObservedMapElement;
 
 public class Grass extends AbstractObservedMapElement {
-    private final int caloricValue;
+    private final long caloricValue;
 
-    public Grass(IWorldMap map, Vector2d initialPosition, int caloricValue) {
+    public Grass(IWorldMap map, Vector2d initialPosition, long caloricValue) {
         super(initialPosition);
         this.caloricValue = caloricValue;
 
@@ -25,7 +25,7 @@ public class Grass extends AbstractObservedMapElement {
         return "*";
     }
 
-    public int getCaloricValue() {
+    public long getCaloricValue() {
         return caloricValue;
     }
 }

@@ -11,10 +11,10 @@ public class Animal extends AbstractObservedMapElement {
     private IWorldMap map;
     private Genome genome;
 
-    private int energy;
-    private final int startingEnergy;
+    private long energy;
+    private final long startingEnergy;
 
-    public Animal(IWorldMap map, Vector2d initialPosition, int energy){
+    public Animal(IWorldMap map, Vector2d initialPosition, long energy){
         super(initialPosition);
         this.map = map;
 
@@ -68,19 +68,19 @@ public class Animal extends AbstractObservedMapElement {
 
     // Method called if animal is about to reproduce
     // Returns energy lost during this process
-    private int animalReproduced(){
-        int energyLost = this.energy / 4;
+    private long animalReproduced(){
+        long energyLost = this.energy / 4;
         this.energy -= energyLost;
         return energyLost;
     }
 
-    public void increaseEnergy(int energyDelta) {
+    public void increaseEnergy(long energyDelta) {
         this.energy += energyDelta;
     }
 
     // Decreases energy
     // If animal is dead after -> remove it and return true
-    public boolean decreaseEnergy(int energyDelta) {
+    public boolean decreaseEnergy(long energyDelta) {
         this.energy -= energyDelta;
         if(this.energy <= 0) {
             this.remove();
@@ -93,12 +93,12 @@ public class Animal extends AbstractObservedMapElement {
         return this.genome;
     }
 
-    public int getEnergy(){
+    public long getEnergy(){
         return this.energy;
     }
 
     public static int compareByEnergy(Animal an1, Animal an2){
-        return Integer.compare(an1.energy, an2.energy);
+        return Long.compare(an1.energy, an2.energy);
     }
 
     @Override

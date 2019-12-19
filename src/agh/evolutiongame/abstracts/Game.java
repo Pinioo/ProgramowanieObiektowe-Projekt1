@@ -4,4 +4,5 @@ public interface Game {
     void start();
     void update();
     void end();
+    boolean isPaused();
 }

@@ -34,9 +34,9 @@ public class Genome {
         //Groups 1 and 2 genes inherit from parent2
         for(int i = 0; i < 32; ++i){
             if(groups[i] == 0)
-                this.genes[i] = parent1.getGenome().getGene(i);
-            else
                 this.genes[i] = parent2.getGenome().getGene(i);
+            else
+                this.genes[i] = parent1.getGenome().getGene(i);
         }
 
         //Providing that genome will be complete by adding not existing genes in random places

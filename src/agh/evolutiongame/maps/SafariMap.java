@@ -10,13 +10,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
+// SafariMap is a class representing map of safari and containing inner map - JungleMap
+// SafariMap takes care of elements on a border of the map (outside jungle)
+// If something changes in jungle -> SafariMap tells jungle to deal with it
 public class SafariMap extends AbstractWorldMap {
     private JungleMap jungle;
-    private final int grassEnergy;
-    private final int moveEnergy;
+    private final long grassEnergy;
+    private final long moveEnergy;
 
-    public SafariMap(int width, int height, double jungleRatio, int grassEnergy, int moveEnergy, int startEnergy, int randomAnimals){
-        super(new Vector2d(0,0), new Vector2d(width-1, height-1));
+    public SafariMap(long width, long height, double jungleRatio, long grassEnergy, long moveEnergy, long startEnergy, long randomAnimals){
+        super(new Vector2d(0,0), new Vector2d((int)width-1, (int)height-1));
         this.jungle = new JungleMap(this.area.scale(jungleRatio));
         this.maxElements -= this.jungle.getMaxElements();
         this.freePositions.removeIf(position -> this.jungle.isPositionInside(position));
@@ -29,7 +33,7 @@ public class SafariMap extends AbstractWorldMap {
         }
     }
 
-    public void placeRandomAnimal(int startEnergy){
+    public void placeRandomAnimal(long startEnergy){
         Vector2d randPosition;
         do {
             randPosition = this.area.randPoint();
@@ -38,6 +42,7 @@ public class SafariMap extends AbstractWorldMap {
                 .addObserver(this);
     }
 
+    // Stream of all animals on whole map
     private Stream<IMapElement> allElementsStream(){
         Stream<IMapElement> stream1 = this.getElementsHashMap().allElementsList().stream();
         Stream<IMapElement> stream2 = this.jungle.getElementsHashMap().allElementsList().stream();
@@ -51,8 +56,8 @@ public class SafariMap extends AbstractWorldMap {
                 .map(Animal.class::cast);
     }
 
-    public int animalsCount(){
-        return (int) this.allAnimalsStream()
+    public long animalsCount(){
+        return (long) this.allAnimalsStream()
                 .count();
     }
 
@@ -99,7 +104,7 @@ public class SafariMap extends AbstractWorldMap {
             if (!animals.isEmpty()) {
                 LinkedList<Animal> strongestAnimalsList = strongestAnimalsOnPosition(position);
 
-                int energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
+                long energyPartForAnimal = grassOnPosition.getCaloricValue() / strongestAnimalsList.size();
                 strongestAnimalsList.forEach(an -> an.increaseEnergy(energyPartForAnimal));
 
                 grassOnPosition.grassEaten();
@@ -172,13 +177,14 @@ public class SafariMap extends AbstractWorldMap {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
+    // List of animals having the same, greatest energy
     public LinkedList<Animal> strongestAnimalsOnPosition(Vector2d position){
         LinkedList<Animal> animals = this.animalsOnPosition(position);
 
         if(animals.isEmpty())
             return animals;
 
-        int maxEnergy = animals.stream()
+        long maxEnergy = animals.stream()
                 .max(Animal::compareByEnergy).get().getEnergy();
 
         return animals.stream()
@@ -195,26 +201,9 @@ public class SafariMap extends AbstractWorldMap {
     }
 
     @Override
-    protected void randGrass(int caloricValue){
-        int mapElements = this.elementsHashMap.size();
-        if(mapElements < this.maxElements){
-            Vector2d randPosition;
-            // If map is filled in less then 80% -> brute force randomizing position
-            if (mapElements < 0.8 * this.maxElements) {
-                do{
-                    randPosition = this.area.randPoint();
-                    // Position must be free and not in jungle
-                }while(this.jungle.isPositionInside(randPosition) || this.isOccupied(randPosition));
-            }
-            // If map is filled in more then 80% -> taking random from free positions' list
-            else{
-                ArrayList<Vector2d> freePositionsList = new ArrayList<>(this.freePositions);
-                randPosition = freePositionsList.get(new Random().nextInt(freePositionsList.size()));
-            }
-            new Grass(this, randPosition, caloricValue).addObserver(this);
-        }
+    public boolean isPositionInside(Vector2d position){
+        return this.area.isPointInside(position) && !this.jungle.isPositionInside(position);
     }
-
 
     @Override
     public void positionChanged(Vector2d oldPosition, Vector2d newPosition, IMapElement element){
@@ -244,16 +233,6 @@ public class SafariMap extends AbstractWorldMap {
             return this.jungle.objectsAt(position);
         else
             return super.objectsAt(position);
-    }
-
-    @Override
-    public Vector2d getLowerLeft() {
-        return this.area.lowerLeft;
-    }
-
-    @Override
-    public Vector2d getUpperRight() {
-        return this.area.upperRight;
     }
 
     @Override

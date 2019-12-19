@@ -13,23 +13,13 @@ public class JungleMap extends AbstractWorldMap {
         super(area);
     }
 
-    public void randGrass(int caloricValue){
+    public void randGrass(long caloricValue){
         super.randGrass(caloricValue);
     }
 
     @Override
     public Vector2d correctPosition(Vector2d requestedPosition) {
         return requestedPosition;
-    }
-
-    @Override
-    public Vector2d getLowerLeft() {
-        return this.area.lowerLeft;
-    }
-
-    @Override
-    public Vector2d getUpperRight() {
-        return this.area.lowerLeft;
     }
 
     @Override

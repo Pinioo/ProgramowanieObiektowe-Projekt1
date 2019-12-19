@@ -7,9 +7,10 @@ import agh.evolutiongame.visualisers.terminal.ScreenCleaner;
 
 public class EvolutionGame implements Game {
     private SafariMap map;
-    private int days;
-    private int currentDay;
-    private int delay;
+    private boolean paused;
+    private long days;
+    private long currentDay;
+    private double delayRatio;
     private GameParameters parameters;
 
     public EvolutionGame(GameParameters parameters){
@@ -22,9 +23,10 @@ public class EvolutionGame implements Game {
                 parameters.startEnergy,
                 parameters.randomAnimals
         );
+        this.paused = false;
+        this.delayRatio = 1.0;
         this.parameters = parameters;
         this.days = parameters.days;
-        this.delay = parameters.delay;
     }
 
     @Override
@@ -40,9 +42,9 @@ public class EvolutionGame implements Game {
 
             // If update time was less than delay -> wait for difference of delay and method call time
             duration = endTime - startTime;
-            if(delay - duration > 0){
+            if(this.getDelay() - duration > 0){
                 try {
-                    Thread.sleep(delay - duration);
+                    Thread.sleep(this.getDelay() - duration);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -83,7 +85,28 @@ public class EvolutionGame implements Game {
         return this.parameters;
     }
 
-    public int getCurrentDay(){
+    public long getCurrentDay(){
         return this.currentDay;
+    }
+
+    @Override
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public boolean isFinished(){
+        return this.currentDay >= this.parameters.days;
+    }
+
+    public void togglePaused(){
+        this.paused = !this.paused;
+    }
+
+    public int getDelay(){
+        return (int) (this.delayRatio * this.parameters.delay);
+    }
+
+    public void setDelayRatio(double delayRatio) {
+        this.delayRatio = delayRatio;
     }
 }

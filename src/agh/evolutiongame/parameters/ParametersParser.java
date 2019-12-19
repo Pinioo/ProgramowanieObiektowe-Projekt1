@@ -90,12 +90,12 @@ public class ParametersParser {
         // If loaded parameter is valid -> save it to config object
         GameParameters config = new GameParameters(defaultParameters);
 
-        int value;
+        long value;
 
         // Looping through all integer fields in GameParameters to check them
         for(String field : integerFields){
             try {
-                value = loadNumberFromJson(json, field).intValue();
+                value = loadNumberFromJson(json, field).longValue();
                 // Every value must be positive
                 if (value <= 0) {
                     throw new IllegalArgumentException(field + " must be positive.");

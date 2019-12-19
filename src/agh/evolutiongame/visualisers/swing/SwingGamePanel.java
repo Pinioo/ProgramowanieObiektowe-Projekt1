@@ -14,9 +14,10 @@ public class SwingGamePanel extends JPanel {
     private int cellHeight;
     private int cellWidth;
     private EvolutionGame currentGame;
-    private Color emptyColor = new Color(209, 206, 200);
-    private Color grassColor =  new Color(45, 179, 45);
-    private Color animalColor = new Color(230, 25, 5);
+
+    public static final Color emptyColor = new Color(209, 206, 200);
+    public static final Color grassColor =  new Color(45, 179, 45);
+    public static final Color animalColor = new Color(230, 25, 5);
 
     SwingGamePanel(EvolutionGame game){
         super();
@@ -30,12 +31,12 @@ public class SwingGamePanel extends JPanel {
             this.setPreferredSize(new Dimension((int) (1600.0 * cellRatio), 900));
         }
 
-        this.cellHeight = this.getPreferredSize().height / game.getParameters().height;
-        this.cellWidth = this.getPreferredSize().width / game.getParameters().width;
+        this.cellHeight = (int) (this.getPreferredSize().height / game.getParameters().height);
+        this.cellWidth = (int) (this.getPreferredSize().width / game.getParameters().width);
 
         this.setPreferredSize(new Dimension(
-                game.getParameters().width * this.cellWidth,
-                game.getParameters().height * this.cellHeight
+                (int) game.getParameters().width * this.cellWidth,
+                (int) game.getParameters().height * this.cellHeight
         ));
 
         this.setSize(this.getPreferredSize());
@@ -47,8 +48,8 @@ public class SwingGamePanel extends JPanel {
         if (elements == null) return emptyColor;
         if (elements.stream().anyMatch(x -> x instanceof Grass)) return grassColor;
         else {
-            int maxEnergy = this.currentGame.getMap().strongestAnimalsOnPosition(position).get(0).getEnergy();
-            int startEnergy = this.currentGame.getParameters().startEnergy;
+            long maxEnergy = this.currentGame.getMap().strongestAnimalsOnPosition(position).get(0).getEnergy();
+            long startEnergy = this.currentGame.getParameters().startEnergy;
             double ratio = (double)maxEnergy / startEnergy;
             int additionalGreen = ratio < 1 ? (int) (200 - ratio * 200) : 0;
             return new Color(animalColor.getRed(), animalColor.getGreen() + additionalGreen, animalColor.getBlue());

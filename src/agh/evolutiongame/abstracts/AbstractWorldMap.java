@@ -16,30 +16,28 @@ public abstract class AbstractWorldMap implements IWorldMap {
 
     protected final Rectangle area;
 
-    protected int maxElements;
+    protected long maxElements;
 
     protected AbstractWorldMap(Vector2d lowerLeft, Vector2d upperRight) {
         this.area = new Rectangle(lowerLeft, upperRight);
         freePositions = this.area.positionsSet();
-        maxElements = this.area.area();
     }
 
     protected AbstractWorldMap(Rectangle area){
         this.area = area;
         freePositions = this.area.positionsSet();
-        maxElements = this.area.area();
     }
 
     // If map is not full places new grass
-    protected void randGrass(int caloricValue){
-        int mapElements = this.elementsHashMap.size();
-        if(mapElements < this.maxElements){
+    protected void randGrass(long caloricValue){
+        if(!this.freePositions.isEmpty()){
+            int freePositionsCount = this.freePositions.size();
             Vector2d randPosition;
             // If map is filled in less then 80% -> brute force randomizing position
-            if (mapElements < 0.8 * this.maxElements) {
+            if (freePositionsCount < 0.2 * this.maxElements) {
                 do{
                     randPosition = this.area.randPoint();
-                }while(this.isOccupied(randPosition));
+                }while(!this.isPositionInside(randPosition) ||this.isOccupied(randPosition));
             }
             // If map is filled in more then 80% -> taking random from free positions' list
             else{
@@ -50,6 +48,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
         }
     }
 
+    // Standard implementation for rectangular map
     public boolean isPositionInside(Vector2d position){
         return this.area.isPointInside(position);
     }
@@ -85,6 +84,16 @@ public abstract class AbstractWorldMap implements IWorldMap {
     }
 
     @Override
+    public Vector2d getLowerLeft() {
+        return this.area.lowerLeft;
+    }
+
+    @Override
+    public Vector2d getUpperRight() {
+        return this.area.lowerLeft;
+    }
+
+    @Override
     public String toString(){
         MapVisualizer visual = new MapVisualizer(this);
         return visual.draw(this.getLowerLeft(), this.getUpperRight());
@@ -98,7 +107,7 @@ public abstract class AbstractWorldMap implements IWorldMap {
         return elementsHashMap;
     }
 
-    public int getMaxElements(){
+    public long getMaxElements(){
         return this.maxElements;
     };
 }

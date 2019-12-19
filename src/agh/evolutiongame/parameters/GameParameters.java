@@ -1,17 +1,17 @@
 package agh.evolutiongame.parameters;
 
 public class GameParameters {
-    public int width;
-    public int height;
+    public long width;
+    public long height;
     public double jungleRatio;
-    public int startEnergy;
-    public int moveEnergy;
-    public int grassEnergy;
-    public int randomAnimals;
-    public int days;
-    public int delay;
+    public long startEnergy;
+    public long moveEnergy;
+    public long grassEnergy;
+    public long randomAnimals;
+    public long days;
+    public long delay;
 
-    public GameParameters(int width, int height, double jungleRatio, int startEnergy, int moveEnergy, int grassEnergy, int randomAnimals, int days, int delay){
+    public GameParameters(long width, long height, double jungleRatio, long startEnergy, long moveEnergy, long grassEnergy, long randomAnimals, long days, long delay){
         this.width = width;
         this.height = height;
         this.jungleRatio = jungleRatio;
